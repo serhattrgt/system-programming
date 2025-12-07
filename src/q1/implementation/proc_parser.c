@@ -20,20 +20,19 @@ void print_memory_maps() {
     int inode;
     char pathname[256];
 
-    // Variables to store main segments
     unsigned long text_start = 0, text_size = 0;
     unsigned long data_start = 0, data_size = 0;
     unsigned long bss_start = 0, bss_size = 0;
     unsigned long heap_start = 0, heap_size = 0;
     unsigned long stack_start = 0, stack_size = 0;
 
-    // Get executable path to identify text/data
+
     char exe_path[256];
     ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path)-1);
     if (len != -1) {
         exe_path[len] = '\0';
     } else {
-        strcpy(exe_path, ""); // Should not happen usually
+        strcpy(exe_path, "");
     }
     
     while (fgets(line, sizeof(line), f)) {
@@ -50,17 +49,14 @@ void print_memory_maps() {
             stack_start = start;
             stack_size = size;
         } else if (strlen(exe_path) > 0 && strcmp(pathname, exe_path) == 0) {
-            // Main binary mapping
             if (perms[0] == 'r' && perms[2] == 'x') {
-                // Text
-                if (text_start == 0) { // Take first r-x
+                if (text_start == 0) {
                     text_start = start;
                     text_size = size;
                 } else {
                     text_size += size;
                 }
             } else if (perms[0] == 'r' && perms[1] == 'w') {
-                // Data
                 if (data_start == 0) {
                     data_start = start;
                     data_size = size;
@@ -76,14 +72,12 @@ void print_memory_maps() {
         }
     }
     
-    // Print Main Segments
     printf("1. Data segment : start = 0x%lx, size = %lu Bytes\n", data_start, data_size);
     printf("2. BSS segment  : start = 0x%lx, size = %lu Bytes\n", bss_start, bss_size);
     printf("3. Heap segment : start = 0x%lx, size = %lu Bytes\n", heap_start, heap_size);
     printf("4. Stack segment: start = 0x%lx, size = %lu Bytes\n", stack_start, stack_size);
     printf("5. Text segment : start = 0x%lx, size = %lu Bytes\n", text_start, text_size);
     
-    // Pass 2 for Shared Libs and VDSO
     rewind(f);
     printf("6. Shared Libraries:\n");
     int i = 0;

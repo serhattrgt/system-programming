@@ -2,7 +2,6 @@
 #include <string.h>
 #include "recommender.h"
 
-// Helper to get recommendation
 void get_recommendation(const char *func, const char *type, const char **reason, const char **suggestion, const char **example) {
     if (strcmp(func, "gets") == 0) {
         *reason = "gets() does not check the length of the input, which can easily cause buffer overflows. It can lead to crashes, data corruption, or serious security vulnerabilities. This function was removed from the C11 standard because it is unsafe.";
@@ -48,25 +47,11 @@ void get_recommendation(const char *func, const char *type, const char **reason,
 }
 
 void print_scan_report(const char *filename, Vulnerability *head) {
-    // printf("Scanning %s...\n", filename); 
-    // Prompt format:
-    // Line 22: gets() used
-    // ...
-    // Total 4 security issues found.
-    
     int count = 0;
     Vulnerability *curr = head;
     while (curr) {
         printf("Line %d: %s() used", curr->line, curr->function_name);
-        // Only print snippet if extended? Prompt doesn't show snippet in 2.1 Scan Mode example.
-        // But 2.3 example shows code snippets.
-        // Actually 2.1 example:
-        // Line 22: gets() used
-        // Line 35: strcpy() used
-        // ...
-        // So just function name.
         if (strcmp(curr->issue_type, "Unsafe Function") != 0 && strcmp(curr->issue_type, "Thread-Unsafe Time Function") != 0) {
-            // For extended / non-standard ones, maybe description is better?
              printf(" (%s)", curr->issue_type);
         }
         printf("\n");

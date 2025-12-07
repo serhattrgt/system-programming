@@ -3,9 +3,9 @@
 
 typedef struct Vulnerability {
     int line;
-    char *function_name; // e.g. "strcpy"
-    char *issue_type;    // e.g. "Unsafe Function", "Format String Vulnerability"
-    char *snippet;       // Line content
+    char *function_name; // strcpy gibi bir method ismi olcak 
+    char *issue_type;    // burası tipi. yani "Unsafe Function" gibi
+    char *snippet;
     struct Vulnerability *next;
 } Vulnerability;
 

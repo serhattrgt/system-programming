@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include "leak_detector.h"
 
-// Linked list structure for tracking allocations
 typedef struct AllocationInfo {
     void *ptr;
     size_t size;
@@ -38,14 +37,13 @@ void tracked_free(void *ptr, const char *file, int line) {
         if ((*curr)->ptr == ptr) {
             AllocationInfo *temp = *curr;
             *curr = (*curr)->next;
-            free(temp); // Free the node
-            free(ptr);  // Free the actual memory
+            free(temp);
+            free(ptr);
             total_freed++;
             return;
         }
         curr = &((*curr)->next);
     }
-    // Optional: Print double free or invalid free warning
 }
 
 void print_leak_report() {

@@ -43,15 +43,12 @@ int main(int argc, char *argv[]) {
     if (monitor_mode) {
         while (1) {
             printf("\033[H\033[J");
-            // Direct call to proc_parser functions or via analyzer?
-            // analyzer has printf \n which might be messy or ok.
             run_memory_analysis();
             sleep(monitor_interval);
         }
         return 0;
     }
 
-    // Default
     run_memory_analysis();
 
     return 0;

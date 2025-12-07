@@ -20,25 +20,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    // Iterate over files
     for (int i = 2; i < argc; i++) {
-        // printf("Analyzing %s...\n", argv[i]);
         int extended = (mode == 'x');
-        // Scan mode also needs to find extended vulnerabilities if -x is passed?
-        // Prompt says: 
-        // 2.1 -s : Find unsafe functions (basic)
-        // 2.3 -x : Find extended vulnerabilities (printf, system, malloc overflow)
-        // So -s only detects basic ones?
-        // But what if -x is passed, do we print report like -s?
-        // Prompt says: "Find and alert the user for following security vulnerabilities."
-        // Let's assume -x prints a report of extended vulnerabilities, probably similar to -s but including extended types.
-        
-        // Scan file
-        // If mode -s, extended=0
-        // If mode -x, extended=1
-        // If mode -r, extended=0 (from prompt implies helper for unsafe functions only)
-        // Let's stick to prompt. -r example is only unsafe functions.
-        
         Vulnerability *head = scan_file(argv[i], extended);
         
         if (mode == 's' || mode == 'x') {
