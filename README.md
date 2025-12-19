@@ -48,6 +48,11 @@ This tool analyzes its own memory usage.
     ./build/q1
     ```
 
+*   **Help (`--help`)**: Display the help menu.
+    ```bash
+    ./build/q1 --help
+    ```
+
 *   **Monitor Mode**: Continuously monitor memory usage (refresh every N seconds).
     ```bash
     ./build/q1 --monitor 2
@@ -63,9 +68,16 @@ This tool analyzes its own memory usage.
     ./build/q1 --all
     ```
 
+
+
 ### 2. Advanced Code Safety Analyzer (`q2`)
 
 This tool scans **other C files** for vulnerabilities.
+
+*   **Help (`--help`)**: Display the help menu.
+    ```bash
+    ./build/q2 --help
+    ```
 
 *   **Scan Mode (`-s`)**: Lists unsafe functions (e.g., `strcpy`, `gets`) with line numbers.
     ```bash
@@ -81,6 +93,8 @@ This tool scans **other C files** for vulnerabilities.
     ```bash
     ./build/q2 -x tests/samples/vulnerable2.c
     ```
+
+
 
 ## Functionality Details
 
