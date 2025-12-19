@@ -47,34 +47,60 @@ void get_recommendation(const char *func, const char *type, const char **reason,
 }
 
 void print_scan_report(const char *filename, Vulnerability *head) {
+    if (!head) {
+        printf("\n\033[1;32m ✔ \033[0m No vulnerabilities found in \033[1m%s\033[0m.\n", filename);
+        return;
+    }
+    
+    printf("\n\033[1;31m┌──────────────────────────────────────────────────────────────┐\033[0m\n");
+    printf("\033[1;31m│           VULNERABILITY REPORT: \033[1;37m%-28s\033[1;31m │\033[0m\n", filename);
+    printf("\033[1;31m└──────────────────────────────────────────────────────────────┘\033[0m\n");
+    
     int count = 0;
     Vulnerability *curr = head;
     while (curr) {
-        printf("Line %d: %s() used", curr->line, curr->function_name);
-        if (strcmp(curr->issue_type, "Unsafe Function") != 0 && strcmp(curr->issue_type, "Thread-Unsafe Time Function") != 0) {
-             printf(" (%s)", curr->issue_type);
+        char *severity_color = "\033[1;33m"; 
+        char *icon = "WARNING";
+        
+        if (strcmp(curr->function_name, "system") == 0 || 
+            strcmp(curr->function_name, "popen") == 0 ||
+            strstr(curr->issue_type, "Format String")) {
+            severity_color = "\033[1;31m"; 
+            icon = "CRITICAL";
         }
-        printf("\n");
+        
+        printf("\n \033[1;30m[Line %3d]\033[0m %s%-10s\033[0m \033[1m%s\033[0m\n", 
+               curr->line, severity_color, icon, curr->issue_type);
+        printf("           \033[90mFunction:\033[0m \033[36m%s\033[0m\n", curr->function_name);
+        
         count++;
         curr = curr->next;
     }
-    printf("\nTotal %d security issues found.\n", count);
+    printf("\n\033[1;30m──────────────────────────────────────────────────────────────\033[0m\n");
+    printf(" \033[1;31mTOTAL ISSUES FOUND: %d\033[0m\n", count);
 }
 
 void print_recommendation_report(const char *filename, Vulnerability *head) {
+    if (!head) return;
+
+    printf("\n\033[1;34m┌──────────────────────────────────────────────────────────────┐\033[0m\n");
+    printf("\033[1;34m│          SECURITY RECOMMENDATIONS: \033[1;37m%-26s\033[1;34m│\033[0m\n", filename);
+    printf("\033[1;34m└──────────────────────────────────────────────────────────────┘\033[0m\n");
+
     Vulnerability *curr = head;
     while (curr) {
-        printf("Line %d: %s() used\n", curr->line, curr->function_name);
+        printf("\n \033[1;30m[Line %3d]\033[0m \033[1;35m%s\033[0m\n", curr->line, curr->function_name);
         
         const char *reason, *suggestion, *example;
         get_recommendation(curr->function_name, curr->issue_type, &reason, &suggestion, &example);
         
-        printf("%s\n\n", reason);
-        printf("Suggestion: %s\n", suggestion);
+        printf(" \033[1;33mProblem:\033[0m    %s\n", reason);
+        printf(" \033[1;32mSuggestion:\033[0m %s\n", suggestion);
         if (strlen(example) > 0) {
-             printf("  Example:\n%s\n", example);
+             printf(" \033[1;36mExample:\033[0m\n");
+             printf("\033[37m%s\033[0m\n", example);
         }
-        printf("\n");
+        printf("\033[1;30m- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \033[0m\n");
         curr = curr->next;
     }
 }

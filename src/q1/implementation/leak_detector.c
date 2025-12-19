@@ -47,9 +47,25 @@ void tracked_free(void *ptr, const char *file, int line) {
 }
 
 void print_leak_report() {
-    printf("1. Memory Leak Report:\n");
-    printf("  Total allocations : %lu\n", total_allocations);
-    printf("  Total freed       : %lu\n", total_freed);
+    printf("\n");
+    if (total_allocations - total_freed == 0 && !head) {
+        printf("\033[1;32m┌──────────────────────────────────────────────────────────────┐\033[0m\n");
+        printf("\033[1;32m│                   NO MEMORY LEAKS DETECTED                   │\033[0m\n");
+        printf("\033[1;32m│                                                              │\033[0m\n");
+        printf("\033[1;32m│          \033[1;37mB221202056 - Serhat Turgut                          \033[1;32m│\033[0m\n");
+        printf("\033[1;32m│          \033[1;37mB221202045 - Yusuf Okur                             \033[1;32m│\033[0m\n");
+        printf("\033[1;32m└──────────────────────────────────────────────────────────────┘\033[0m\n");
+    } else {
+        printf("\033[1;31m┌──────────────────────────────────────────────────────────────┐\033[0m\n");
+        printf("\033[1;31m│                    MEMORY LEAK REPORT                        │\033[0m\n");
+        printf("\033[1;31m│                                                              │\033[0m\n");
+        printf("\033[1;31m│          \033[1;37mB221202056 - Serhat Turgut                          \033[1;31m│\033[0m\n");
+        printf("\033[1;31m│          \033[1;37mB221202045 - Yusuf Okur                             \033[1;31m│\033[0m\n");
+        printf("\033[1;31m└──────────────────────────────────────────────────────────────┘\033[0m\n");
+    }
+    
+    printf("\n \033[1;34m▶\033[0m Total allocations : \033[1m%lu\033[0m\n", total_allocations);
+    printf(" \033[1;34m▶\033[0m Total freed       : \033[1m%lu\033[0m\n", total_freed);
     
     size_t leaked_count = 0;
     AllocationInfo *curr = head;
@@ -57,27 +73,36 @@ void print_leak_report() {
         leaked_count++;
         curr = curr->next;
     }
-    printf("  Leaked blocks     : %lu\n", leaked_count);
-    printf("\n");
-
-    curr = head;
-    int block_num = 1;
-    while (curr) {
-        printf("  Block #%d: %lu bytes at %p\n", block_num++, curr->size, curr->ptr);
-        printf("    Allocated at: %s:%d\n", curr->file, curr->line);
-        curr = curr->next;
+    
+    if (leaked_count > 0) {
+        printf(" \033[1;31m▶\033[0m Leaked blocks     : \033[1;31m%lu\033[0m\n", leaked_count);
+        printf("\n\033[1;31m  LEAK DETAILS:\033[0m\n");
+        printf("\033[1;30m  ────────────────────────────────────────────────────────────\033[0m\n");
+    
+        curr = head;
+        int block_num = 1;
+        while (curr) {
+            printf("  \033[1;31m[%d]\033[0m \033[1;33m%lu bytes\033[0m at \033[37m%p\033[0m\n", block_num++, curr->size, curr->ptr);
+            printf("      \033[90mAllocated at:\033[0m \033[36m%s\033[0m:\033[1;33m%d\033[0m\n", curr->file, curr->line);
+            if (curr->next) printf("\n");
+            curr = curr->next;
+        }
+        printf("\033[1;30m  ────────────────────────────────────────────────────────────\033[0m\n");
+    } else {
+         printf(" \033[1;32m▶\033[0m Leaked blocks     : \033[1;32m0\033[0m\n");
     }
 }
 
 void run_leak_check() {
-    printf("--- Running Leak Check ---\n");
-    // Example from prompt
+    printf("\033[1;36m┌──────────────────────────────────────────────────────────────┐\033[0m\n");
+    printf("\033[1;36m│                  RUNNING LEAK DETECTOR...                    │\033[0m\n");
+    printf("\033[1;36m└──────────────────────────────────────────────────────────────┘\033[0m\n");
     char *p1 = MALLOC(100);
-    char *p2 = MALLOC(200);
+    char *p2 = MALLOC(100);
     FREE(p1);
-    // p2 not freed -> LEAK!
+
     print_leak_report();
     
-    // Cleanup for clean exit if needed
+    
     FREE(p2); 
 }

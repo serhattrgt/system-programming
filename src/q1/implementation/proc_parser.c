@@ -6,11 +6,15 @@
 #include "proc_parser.h"
 
 void print_memory_maps() {
-    printf("1.1 Memory Segment Analysis\n");
-    printf("1.2 List All Memory Segments\n");
+    printf("\n\033[1;36m┌──────────────────────────────────────────────────────────────┐\033[0m\n");
+    printf("\033[1;36m│                 MEMORY SEGMENT ANALYSIS                      │\033[0m\n");
+    printf("\033[1;36m│                                                              │\033[0m\n");
+    printf("\033[1;36m│          \033[1;37mB221202056 - Serhat Turgut                          \033[1;36m│\033[0m\n");
+    printf("\033[1;36m│          \033[1;37mB221202045 - Yusuf Okur                             \033[1;36m│\033[0m\n");
+    printf("\033[1;36m└──────────────────────────────────────────────────────────────┘\033[0m\n");
     
     FILE *f = fopen("/proc/self/maps", "r");
-    if (!f) { perror("fopen maps"); return; }
+    if (!f) { perror("\033[1;31mError opening maps\033[0m"); return; }
 
     char line[1024];
     unsigned long start, end;
@@ -36,7 +40,7 @@ void print_memory_maps() {
     }
     
     while (fgets(line, sizeof(line), f)) {
-        strcpy(pathname, ""); // Reset
+        strcpy(pathname, ""); 
         sscanf(line, "%lx-%lx %4s %s %s %d %s", 
                            &start, &end, perms, offset, dev, &inode, pathname);
         
@@ -72,14 +76,20 @@ void print_memory_maps() {
         }
     }
     
-    printf("1. Data segment : start = 0x%lx, size = %lu Bytes\n", data_start, data_size);
-    printf("2. BSS segment  : start = 0x%lx, size = %lu Bytes\n", bss_start, bss_size);
-    printf("3. Heap segment : start = 0x%lx, size = %lu Bytes\n", heap_start, heap_size);
-    printf("4. Stack segment: start = 0x%lx, size = %lu Bytes\n", stack_start, stack_size);
-    printf("5. Text segment : start = 0x%lx, size = %lu Bytes\n", text_start, text_size);
+    printf("\033[1m%-15s │ %-18s │ %-15s\033[0m\n", "SEGMENT", "START ADDRESS", "SIZE (Bytes)");
+    printf("\033[1;30m────────────────┼────────────────────┼────────────────\033[0m\n");
+    printf("\033[1;32m%-15s\033[0m │ 0x%-16lx │ \033[1;33m%lu\033[0m\n", "Data", data_start, data_size);
+    printf("\033[1;32m%-15s\033[0m │ 0x%-16lx │ \033[1;33m%lu\033[0m\n", "BSS", bss_start, bss_size);
+    printf("\033[1;34m%-15s\033[0m │ 0x%-16lx │ \033[1;33m%lu\033[0m\n", "Heap", heap_start, heap_size);
+    printf("\033[1;35m%-15s\033[0m │ 0x%-16lx │ \033[1;33m%lu\033[0m\n", "Stack", stack_start, stack_size);
+    printf("\033[1;36m%-15s\033[0m │ 0x%-16lx │ \033[1;33m%lu\033[0m\n", "Text", text_start, text_size);
+    printf("\033[1;30m────────────────┴────────────────────┴────────────────\033[0m\n");
     
     rewind(f);
-    printf("6. Shared Libraries:\n");
+    printf("\n\033[1;36m┌──────────────────────────────────────────────────────────────┐\033[0m\n");
+    printf("\033[1;36m│                   SHARED LIBRARIES                           │\033[0m\n");
+    printf("\033[1;36m└──────────────────────────────────────────────────────────────┘\033[0m\n");
+    
     int i = 0;
     while (fgets(line, sizeof(line), f)) {
         strcpy(pathname, "");
@@ -93,16 +103,15 @@ void print_memory_maps() {
                  char *name = strrchr(pathname, '/');
                  if (name) name++; else name = pathname;
                  
-                 printf("%d. %-14s : 0x%lx-0x%lx (%lu KB) %s\n", 
-                        i + 7, name, start, end, size_kb, perms);
+                 printf(" \033[1;34m%2d.\033[0m \033[1m%-25s\033[0m : \033[37m0x%lx-0x%lx\033[0m (\033[1;33m%lu KB\033[0m) \033[32m%s\033[0m\n", 
+                        i + 1, name, start, end, size_kb, perms);
                  i++;
             }
         }
     }
     
     rewind(f);
-    printf("Shared Libraries Section continued (VDSO):\n"); 
-
+    
     while (fgets(line, sizeof(line), f)) {
         strcpy(pathname, "");
         sscanf(line, "%lx-%lx %4s %s %s %d %s", 
@@ -111,7 +120,7 @@ void print_memory_maps() {
         if (strcmp(pathname, "[vdso]") == 0) {
              unsigned long size_bytes = end - start;
              unsigned long size_kb = size_bytes / 1024;
-             printf("   [vdso]        : 0x%lx-0x%lx (%lu KB) %s\n", 
+             printf(" \033[1;35m[vdso]\033[0m                      : \033[37m0x%lx-0x%lx\033[0m (\033[1;33m%lu KB\033[0m) \033[32m%s\033[0m\n", 
                     start, end, size_kb, perms);
         }
     }
@@ -120,37 +129,39 @@ void print_memory_maps() {
 }
 
 void print_memory_status() {
-    printf("1.3 Virtual vs Physical Memory Analysis\n");
+    printf("\n\033[1;36m┌──────────────────────────────────────────────────────────────┐\033[0m\n");
+    printf("\033[1;36m│             VIRTUAL VS PHYSICAL MEMORY ANALYSIS              │\033[0m\n");
+    printf("\033[1;36m└──────────────────────────────────────────────────────────────┘\033[0m\n");
+
     FILE *f = fopen("/proc/self/status", "r");
-    if (!f) { perror("fopen status"); return; }
+    if (!f) { perror("\033[1;31mfopen status\033[0m"); return; }
     
     char line[256];
     long vm_size = 0, vm_rss = 0, vm_data = 0, vm_stk = 0, vm_exe = 0;
     
-    printf("1. Virtual Memory:\n");
     
     while (fgets(line, sizeof(line), f)) {
         if (strncmp(line, "VmSize:", 7) == 0) {
             sscanf(line, "VmSize: %ld", &vm_size);
-            printf("2.   VmSize : %ld KB  (Total virtual memory)\n", vm_size);
+            printf(" \033[1;34m▶\033[0m \033[1mVmSize : \033[1;33m%8ld KB\033[0m  \033[90m(Total virtual memory)\033[0m\n", vm_size);
         } else if (strncmp(line, "VmRSS:", 6) == 0) {
             sscanf(line, "VmRSS: %ld", &vm_rss);
-            printf("3.   VmRSS  : %ld KB  (Resident in physical memory)\n", vm_rss);
+            printf(" \033[1;34m▶\033[0m \033[1mVmRSS  : \033[1;33m%8ld KB\033[0m  \033[90m(Resident in physical memory)\033[0m\n", vm_rss);
         } else if (strncmp(line, "VmData:", 7) == 0) {
             sscanf(line, "VmData: %ld", &vm_data);
-            printf("4.   VmData : %ld KB  (Data segment)\n", vm_data);
+            printf(" \033[1;34m▶\033[0m \033[1mVmData : \033[1;33m%8ld KB\033[0m  \033[90m(Data segment)\033[0m\n", vm_data);
         } else if (strncmp(line, "VmStk:", 6) == 0) {
             sscanf(line, "VmStk: %ld", &vm_stk);
-            printf("5.   VmStk  : %ld KB  (Stack)\n", vm_stk);
+            printf(" \033[1;34m▶\033[0m \033[1mVmStk  : \033[1;33m%8ld KB\033[0m  \033[90m(Stack)\033[0m\n", vm_stk);
         } else if (strncmp(line, "VmExe:", 6) == 0) {
             sscanf(line, "VmExe: %ld", &vm_exe);
-            printf("6.   VmExe  : %ld KB  (Text/Code)\n", vm_exe);
+            printf(" \033[1;34m▶\033[0m \033[1mVmExe  : \033[1;33m%8ld KB\033[0m  \033[90m(Text/Code)\033[0m\n", vm_exe);
         }
     }
     fclose(f);
     
     if (vm_size > 0) {
         double efficiency = ((double)vm_rss / vm_size) * 100.0;
-        printf("8. Memory Efficiency: %.1f%% (Physical/Virtual)\n", efficiency);
+        printf("\n \033[1;32m✔ Memory Efficiency\033[0m: \033[1;37m%.1f%%\033[0m \033[90m(Physical/Virtual)\033[0m\n", efficiency);
     }
 }

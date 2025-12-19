@@ -2,13 +2,13 @@
 #include <stdlib.h>
 
 void ext_func(char *input) {
-    printf(input); // Format string
-    fprintf(stderr, input); // Format string
+    printf(input); 
+    fprintf(stderr, input); 
     
-    system("ls -la"); // Command injection
-    popen("cat file", "r"); // Command injection
+    system("ls -la"); 
+    popen("cat file", "r"); 
     
     int count = 100;
     int size = 50;
-    void *ptr = malloc(count * size); // Overflow
+    void *ptr = malloc(count * size); 
 }

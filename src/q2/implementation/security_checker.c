@@ -12,7 +12,6 @@ Vulnerability* add_vuln(Vulnerability *head, int line, const char *func, const c
     node->function_name = strdup(func);
     node->issue_type = strdup(type);
     
-    // Trim newline from snippet
     node->snippet = strdup(snippet);
     char *n = strrchr(node->snippet, '\n');
     if (n) *n = '\0';
