@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include "proc_parser.h"
 
+extern char __bss_start;
+extern char _end;
+
 void print_memory_maps() {
     printf("\n\033[1;36m┌──────────────────────────────────────────────────────────────┐\033[0m\n");
     printf("\033[1;36m│                 MEMORY SEGMENT ANALYSIS                      │\033[0m\n");
@@ -26,7 +29,6 @@ void print_memory_maps() {
 
     unsigned long text_start = 0, text_size = 0;
     unsigned long data_start = 0, data_size = 0;
-    unsigned long bss_start = 0, bss_size = 0;
     unsigned long heap_start = 0, heap_size = 0;
     unsigned long stack_start = 0, stack_size = 0;
 
@@ -42,7 +44,7 @@ void print_memory_maps() {
     while (fgets(line, sizeof(line), f)) {
         strcpy(pathname, ""); 
         sscanf(line, "%lx-%lx %4s %s %s %d %s", 
-                           &start, &end, perms, offset, dev, &inode, pathname);
+               &start, &end, perms, offset, dev, &inode, pathname);
         
         unsigned long size = end - start;
 
@@ -52,34 +54,27 @@ void print_memory_maps() {
         } else if (strstr(pathname, "[stack]")) {
             stack_start = start;
             stack_size = size;
-        } else if (strlen(exe_path) > 0 && strcmp(pathname, exe_path) == 0) {
+        } else if (len > 0 && strcmp(pathname, exe_path) == 0) {
             if (perms[0] == 'r' && perms[2] == 'x') {
-                if (text_start == 0) {
-                    text_start = start;
-                    text_size = size;
-                } else {
-                    text_size += size;
-                }
+                if (text_start == 0) text_start = start;
+                text_size += size; 
             } else if (perms[0] == 'r' && perms[1] == 'w') {
-                if (data_start == 0) {
-                    data_start = start;
-                    data_size = size;
-                } else {
-                    data_size += size;
-                }
+                if (data_start == 0) data_start = start;
+                data_size += size;
             }
-        } else if (strcmp(pathname, "") == 0 && data_start != 0 && start == data_start + data_size) {
-             if (perms[0] == 'r' && perms[1] == 'w') {
-                 bss_start = start;
-                 bss_size = size;
-             }
         }
     }
+
+    unsigned long bss_real_start = (unsigned long)&__bss_start;
+    unsigned long bss_real_end = (unsigned long)&_end;
+    unsigned long bss_real_size = bss_real_end - bss_real_start;
+    long page_size = sysconf(_SC_PAGESIZE);
+    unsigned long bss_aligned_size = ((bss_real_size + page_size - 1) / page_size) * page_size;
     
     printf("\033[1m%-15s │ %-18s │ %-15s\033[0m\n", "SEGMENT", "START ADDRESS", "SIZE (Bytes)");
     printf("\033[1;30m────────────────┼────────────────────┼────────────────\033[0m\n");
     printf("\033[1;32m%-15s\033[0m │ 0x%-16lx │ \033[1;33m%lu\033[0m\n", "Data", data_start, data_size);
-    printf("\033[1;32m%-15s\033[0m │ 0x%-16lx │ \033[1;33m%lu\033[0m\n", "BSS", bss_start, bss_size);
+    printf("\033[1;32m%-15s\033[0m │ 0x%-16lx │ \033[1;33m%lu\033[0m\n", "BSS", bss_real_start, bss_aligned_size);
     printf("\033[1;34m%-15s\033[0m │ 0x%-16lx │ \033[1;33m%lu\033[0m\n", "Heap", heap_start, heap_size);
     printf("\033[1;35m%-15s\033[0m │ 0x%-16lx │ \033[1;33m%lu\033[0m\n", "Stack", stack_start, stack_size);
     printf("\033[1;36m%-15s\033[0m │ 0x%-16lx │ \033[1;33m%lu\033[0m\n", "Text", text_start, text_size);

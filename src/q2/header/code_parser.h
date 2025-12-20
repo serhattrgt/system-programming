@@ -22,8 +22,9 @@ int check_format_string(const char *line, const char *func);
 /**
  * Checks for potential integer overflow in malloc calls (e.g. malloc(a * b)).
  * @param line: The code line containing malloc
+ * @param prev_line: The previous line of code for context
  * @return 1 if vulnerable pattern found, 0 otherwise
  */
-int check_malloc_overflow(const char *line);
+int check_malloc_overflow(const char *line, const char *prev_line);
 
 #endif

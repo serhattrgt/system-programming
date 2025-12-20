@@ -41,9 +41,14 @@ int check_format_string(const char *line, const char *func) {
     return 0;
 }
 
-int check_malloc_overflow(const char *line) {
+int check_malloc_overflow(const char *line, const char *prev_line) {
     const char *p = strstr(line, "malloc");
     if (!p) return 0;
+    
+    // Check previous line for safety check (simple heuristic)
+    if (prev_line && strstr(prev_line, "SIZE_MAX") && strstr(prev_line, "/")) {
+        return 0;
+    }
     
     const char *paren = strchr(p, '(');
     if (!paren) return 0;

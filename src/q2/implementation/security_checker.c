@@ -31,6 +31,7 @@ Vulnerability* scan_file(const char *filename, int extended_mode) {
     const char *unsafe_funcs[] = {"strcpy", "strcat", "sprintf", "gets", "scanf", NULL};
     const char *time_funcs[] = {"gmtime", "localtime", "ctime", "asctime", NULL};
     
+    char prev_line[1024] = "";
     while (fgets(line, sizeof(line), f)) {
         line_num++;
         
@@ -66,11 +67,12 @@ Vulnerability* scan_file(const char *filename, int extended_mode) {
             }
             
             if (contains_token(line, "malloc")) {
-                if (check_malloc_overflow(line)) {
+                if (check_malloc_overflow(line, prev_line)) {
                      head = add_vuln(head, line_num, "malloc", "Integer Overflow Risk", line);
                 }
             }
         }
+        strcpy(prev_line, line);
     }
     
     fclose(f);

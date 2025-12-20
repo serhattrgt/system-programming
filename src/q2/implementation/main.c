@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
         Vulnerability *head = scan_file(argv[i], extended);
         
         if (mode == 's' || mode == 'x') {
-            print_scan_report(argv[i], head);
+            print_scan_report(argv[i], head, (mode == 'x'));
         } else if (mode == 'r') {
             print_recommendation_report(argv[i], head);
         }
